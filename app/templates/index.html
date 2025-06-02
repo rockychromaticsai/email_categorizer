@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Categorizer</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        textarea { 
+            width: 100%; 
+            height: 100px; 
+            margin: 10px 0; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button { 
+            padding: 10px 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Categorizer</h1>
+    
+    <h2>Single Email</h2>
+    <textarea id="singleEmail" placeholder="Enter email content here..."></textarea>
+    <button onclick="classifySingle()">Classify</button>
+    <div id="singleResult" class="result"></div>
+
+    <h2>Batch Emails</h2>
+    <textarea id="batchEmails" placeholder="Enter multiple emails, one per line..."></textarea>
+    <div>
+        <button onclick="classifyBatch()">Classify Batch</button>
+        <button onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div id="batchResult" class="result"></div>
+
+    <script>
+        async function classifySingle() {
+            const email = document.getElementById('singleEmail').value;
+            if (!email.trim()) {
+                alert('Please enter an email to classify');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/classify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content: email})
+                });
+                const result = await response.json();
+                document.getElementById('singleResult').innerHTML = 
+                    `Tags: ${result.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}`;
+            } catch (error) {
+                document.getElementById('singleResult').innerHTML = 
+                    'Error: Failed to classify email. Please try again.';
+            }
+        }
+
+        async function classifyBatch() {
+            const emails = document.getElementById('batchEmails').value
+                .split('\n')
+                .map(e => e.trim())
+                .filter(e => e);
+                
+            if (emails.length === 0) {
+                alert('Please enter at least one email to classify');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/classify-batch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({emails: emails})
+                });
+                const result = await response.json();
+                document.getElementById('batchResult').innerHTML = 
+                    result.results.map(r => 
+                        `<div style="margin-bottom: 15px;">
+                            <div><strong>Email:</strong> ${r.email}</div>
+                            <div><strong>Tags:</strong> ${r.tags.map(tag => 
+                                `<span class="tag">${tag}</span>`).join(' ')}</div>
+                        </div>`
+                    ).join('<hr>');
+            } catch (error) {
+                document.getElementById('batchResult').innerHTML = 
+                    'Error: Failed to classify emails. Please try again.';
+            }
+        }
+
+        async function exportCSV() {
+            const emails = document.getElementById('batchEmails').value
+                .split('\n')
+                .map(e => e.trim())
+                .filter(e => e);
+                
+            if (emails.length === 0) {
+                alert('Please enter at least one email to export');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/export-csv', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({emails: emails})
+                });
+                const result = await response.json();
+                
+                // Create and download CSV file
+                const blob = new Blob([result.csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'email_classifications.csv';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Error: Failed to export CSV. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
