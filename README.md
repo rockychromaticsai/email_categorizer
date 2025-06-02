@@ -11,7 +11,11 @@ An AI-powered email classification system that categorizes customer emails into 
 - REST API endpoints
 
 ##Video Preview
-https://github.com/user-attachments/assets/a2390a0b-8915-4145-952c-16eb5cdd0473
+
+
+https://github.com/user-attachments/assets/321d4a5f-f692-4c24-a367-9e58d92da2a1
+
+
 
 ## Setup
 
