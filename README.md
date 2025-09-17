@@ -86,4 +86,7 @@ print(response.json())
 9. Spam/Irrelevant
 10. Refund Request
 11. Shipping/Delivery
-12. Other
+12. Other<img width="1080" height="1080" alt="offgrid-template" src="https://github.com/user-attachments/assets/1ca559b5-2cf7-4b3a-b962-24c7cdec5f02" />
+
+
+
